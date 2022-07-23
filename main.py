@@ -8,13 +8,12 @@ st.title("Aqualog")
 
 menu = ["Home", "Login", "Your Data"]
 choice = st.sidebar.selectbox("Menu", menu)
-connected = False
 
 if choice == "Home":
     st.subheader("Home page")
 
 elif choice == "Login":
-    if connected:
+    if aql.connected:
         st.info("Already connected to community.")
     else:
         ID = st.text_input("Enter Community ID: ")
@@ -27,22 +26,21 @@ elif choice == "Login":
             else:
                 aql.authenticate()
                 st.info("Connection established.")
-                connected = True
 
-        if st.button("End Connection"):
-            aql.clean_up()
-            st.info("Connection closed.")
-            connected = False
+    if st.button("End Connection"):
+        aql.clean_up()
+        st.info("Connection closed.")
 
 elif choice == "Your Data":
-    st.title("Data Creation")
-    
-    creation_menu = ["Independant Home", "Apartment"]
-    creation_choice = st.radio('Choose type of data to add', creation_menu)
+    if aql.connected:
+        st.header("Data Creation")
+        
+        creation_menu = ["Independant Home", "Apartment"]
+        creation_choice = st.radio('Choose type of data to add', creation_menu)
 
-    if creation_choice == "Apartment":
-        num_houses = int(st.text_input("Enter number of houses in the apartment: "))
-        apt_name = (st.text_input("Enter Apartment name: "))
-        aql.create_aptmt(apt_name, num_houses)
-    else:
-        st.info("This section is still being worked on.")
+        if creation_choice == "Apartment":
+            num_houses = int(st.text_input("Enter number of houses in the apartment: "))
+            apt_name = (st.text_input("Enter Apartment name: "))
+            aql.create_aptmt(apt_name, num_houses)
+        else:
+            st.info("This section is still being worked on.")
