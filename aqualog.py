@@ -13,7 +13,7 @@ class Aqualog:
     def start_connection(_self):
         return mysql.connector.connect(**st.secrets["mysql"])
 
-    def authenticate(self, userid, code):
+    def authenticate(self):
         self.datacon = self.start_connection()
         self.cursor = self.datacon.cursor()
 
