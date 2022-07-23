@@ -23,7 +23,7 @@ elif choice == "Login":
                 st.error("Incorrect password.")
 
             else:
-                aql.authenticate(ID, CODE)
+                aql.authenticate()
                 st.info("Connection established.")
 
     if st.button("End Connection"):
