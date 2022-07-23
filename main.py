@@ -35,18 +35,14 @@ elif choice == "Login":
             connected = False
 
 elif choice == "Your Data":
-    if connected:
-        st.title("Data Creation")
-        
-        creation_menu = ["Independant Home", "Apartment"]
-        creation_choice = st.radio('Choose type of data to add', creation_menu)
+    st.title("Data Creation")
+    
+    creation_menu = ["Independant Home", "Apartment"]
+    creation_choice = st.radio('Choose type of data to add', creation_menu)
 
-        if creation_choice == "Apartment":
-            num_houses = int(st.text_input("Enter number of houses in the apartment: "))
-            apt_name = (st.text_input("Enter Apartment name: "))
-            aql.create_aptmt(apt_name, num_houses)
-        else:
-            st.info("This section is still being worked on.")
-
+    if creation_choice == "Apartment":
+        num_houses = int(st.text_input("Enter number of houses in the apartment: "))
+        apt_name = (st.text_input("Enter Apartment name: "))
+        aql.create_aptmt(apt_name, num_houses)
     else:
-        st.info("Use the login page first.")
+        st.info("This section is still being worked on.")
