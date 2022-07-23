@@ -36,7 +36,7 @@ elif choice == "Login":
 
 elif choice == "Your Data":
     if connected:
-        st.header("Data Creation")
+        st.title("Data Creation")
         
         creation_menu = ["Independant Home", "Apartment"]
         creation_choice = st.radio('Choose type of data to add', creation_menu)
@@ -47,3 +47,6 @@ elif choice == "Your Data":
             aql.create_aptmt(apt_name, num_houses)
         else:
             st.info("This section is still being worked on.")
+
+    else:
+        st.info("Use the login page first.")
