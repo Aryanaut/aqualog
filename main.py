@@ -8,12 +8,13 @@ st.title("Aqualog")
 
 menu = ["Home", "Login", "Your Data"]
 choice = st.sidebar.selectbox("Menu", menu)
+connected = False
 
 if choice == "Home":
     st.subheader("Home page")
 
 elif choice == "Login":
-    if aql.connected:
+    if connected:
         st.info("Already connected to community.")
     else:
         ID = st.text_input("Enter Community ID: ")
@@ -26,13 +27,15 @@ elif choice == "Login":
             else:
                 aql.authenticate()
                 st.info("Connection established.")
+                connected = True
 
         if st.button("End Connection"):
             aql.clean_up()
             st.info("Connection closed.")
+            connected = False
 
 elif choice == "Your Data":
-    if aql.connected:
+    if connected:
         st.header("Data Creation")
         
         creation_menu = ["Independant Home", "Apartment"]
