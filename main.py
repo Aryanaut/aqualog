@@ -1,4 +1,4 @@
-from functions.aqualog import Aqualog
+from .functions.aqualog import Aqualog
 import streamlit as st
 
 aql = Aqualog()
@@ -14,4 +14,3 @@ if CODE != 'bWw2vluRxM':
 else:
     aql.authenticate(ID, CODE)
     st.info("Connection established.")
-    
