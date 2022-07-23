@@ -6,6 +6,7 @@ class Aqualog:
         self.wtr_tax = 7 # Bangalore water charge is Rs. 7 per kilolitre. This may change.
         self.ideal_wtr = 4050
         self.ideal_wtr_tax = 4.05 * self.wtr_tax
+        self.connected = False
 
     def authenticate(self, userid, code):
         self.datacon = mysql.connector.connect(host='remotemysql.com', user=userid, passwd=code, database=userid)
@@ -62,3 +63,6 @@ class Aqualog:
     def money_spent_extra(self, aptmt, houseid):
         house = self.info_extract_house(aptmt, houseid)
         return house[2] - self.ideal_wtr_tax
+
+    def clean_up(self):
+        self.datacon.close()
