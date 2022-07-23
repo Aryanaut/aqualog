@@ -10,7 +10,7 @@ class Aqualog:
         self.connected = False
     
     @st.experimental_singleton
-    def start_connection():
+    def start_connection(self):
         return mysql.connector.connect(**st.secrets["mysql"])
 
     def authenticate(self, userid, code):
