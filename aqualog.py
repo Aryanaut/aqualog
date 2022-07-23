@@ -17,6 +17,7 @@ class Aqualog:
     def authenticate(self):
         self.datacon = self.start_connection()
         self.cursor = self.datacon.cursor()
+        self.connected = True
 
     @st.experimental_memo()
     def query(self, query):

@@ -27,6 +27,10 @@ elif choice == "Login":
                 aql.authenticate()
                 st.info("Connection established.")
 
+        if st.button("End Connection"):
+            aql.clean_up()
+            st.info("Connection closed.")
+
 elif choice == "Your Data":
     if aql.connected:
         st.header("Data Creation")
@@ -40,7 +44,3 @@ elif choice == "Your Data":
             aql.create_aptmt(apt_name, num_houses)
         else:
             st.info("This section is still being worked on.")
-
-    if st.button("End Connection"):
-        aql.clean_up()
-        st.info("Connection closed.")
