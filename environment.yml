@@ -1,0 +1,4 @@
+name: aqualog
+dependencies:
+  - mysql-connector-python
+  - pandas
