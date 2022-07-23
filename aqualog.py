@@ -1,6 +1,5 @@
 import mysql.connector
 import streamlit as st
-import pandas as pd
 
 class Aqualog:
 
