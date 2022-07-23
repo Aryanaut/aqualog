@@ -1,5 +1,6 @@
 import mysql.connector
 import streamlit as st
+import pandas as pd
 
 class Aqualog:
 
@@ -16,6 +17,7 @@ class Aqualog:
     def authenticate(self):
         self.datacon = self.start_connection()
         self.cursor = self.datacon.cursor()
+        self.connected = True
 
     @st.experimental_memo()
     def query(self, query):
@@ -27,7 +29,7 @@ class Aqualog:
         command_create='create table '+ aptmtnm +' (HouseId Varchar(10) Primary Key, NumPpl Int Default 0, WaterCharge Int Default 0, NumLitres Int Default 0, OverageLitres Int Default 0)'
         self.cursor.execute(command_create)
         for i in range(num_houses):
-            HouseId=input('Input the unique HouseId: ')
+            HouseId= st.text_input('Input the unique HouseId: ')
             # UniqueHousePwd=input('Input the unique house password: ')
             command_insert='insert into '+ aptmtnm +' (HouseId) values (\''+ HouseId +'\')'
             self.query(command_insert)
