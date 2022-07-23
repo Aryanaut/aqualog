@@ -5,10 +5,16 @@ aql = Aqualog()
 
 st.title("Aqualog")
 
-if aql.connected:
-    st.info("Already connected to community.")
-else:
-    if st.button("Connect to Community"):
+menu = ["Home", "Login"]
+choice = st.sidebar.selectbox("Menu", menu)
+
+if choice == "Home":
+    st.subheader("Home page")
+
+elif choice == "Login":
+    if aql.connected:
+        st.info("Already connected to community.")
+    else:
         ID = st.text_input("Enter Community ID: ")
         CODE = st.text_input("Enter Community password: ", type="password")
 

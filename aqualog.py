@@ -65,4 +65,5 @@ class Aqualog:
         return house[2] - self.ideal_wtr_tax
 
     def clean_up(self):
-        self.datacon.close()
+        if self.connected:
+            self.datacon.close()
