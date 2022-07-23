@@ -1,4 +1,5 @@
 import mysql.connector
+import streamlit as st
 
 class Aqualog:
 
@@ -7,10 +8,20 @@ class Aqualog:
         self.ideal_wtr = 4050
         self.ideal_wtr_tax = 4.05 * self.wtr_tax
         self.connected = False
+    
+    @st.experimental_singleton
+    def start_connection():
+        return mysql.connector.connect(**st.secrets["mysql"])
 
     def authenticate(self, userid, code):
-        self.datacon = mysql.connector.connect(host='remotemysql.com', user=userid, passwd=code, database=userid)
+        self.datacon = self.start_connection()
         self.cursor = self.datacon.cursor()
+
+    @st.experimental_memo()
+    def query(self, query):
+        with self.datacon.cursor() as cur:
+            cur.execute(query)
+            return cur.fetchall()
 
     def create_aptmt(self, aptmtnm, num_houses):
         command_create='create table '+ aptmtnm +' (HouseId Varchar(10) Primary Key, NumPpl Int Default 0, WaterCharge Int Default 0, NumLitres Int Default 0, OverageLitres Int Default 0)'
