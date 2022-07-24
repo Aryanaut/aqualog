@@ -21,7 +21,7 @@ class Aqualog:
     def start_connection(_self):
         return mysql.connector.connect(**st.secrets["mysql"])
 
-    @st.experimental_memo(ttl=600)
+    @st.experimental_memo(ttl=60)
     def query(_self, query):
         with _self.datacon.cursor() as cur:
             cur.execute(query)
@@ -33,11 +33,11 @@ class Aqualog:
         self.connected = True
 
     def create_aptmt(self, aptmtnm, house_list):
-        command_create='create table if not exists '+ aptmtnm +' (HouseId Varchar(10) Primary Key, NumPpl Int Default 0, WaterCharge Int Default 0, NumLitres Int Default 0, OverageLitres Int Default 0)'
+        command_create='create table if not exists '+ aptmtnm +' (HouseId Varchar(10) Primary Key, NumPpl Int, WaterCharge Int, NumLitres Int, OverageLitres Int)'
         self.query(command_create)
         for i in house_list:
             # UniqueHousePwd=input('Input the unique house password: ')
-            command_insert='insert into '+ aptmtnm +' (HouseId) values (\''+ i +'\')'
+            command_insert='insert into '+ aptmtnm +' values (\''+ i +'\', 0, 1, 0, 0)'
             self.query(command_insert)
 
     def get_apt_names(self):
@@ -57,7 +57,7 @@ class Aqualog:
         if returnDF:
             return DataFrame(self.query(command), columns=['HouseID', 'Residents', 'Water Charge', 'Water Usage (Liters)', 'Overage (Liters)'])
         else:
-            return self.query(command) + [0] * 5
+            return self.query(command) + [1] * 5
 
     def amt_wtr(self, aptmt, houseid):
         
@@ -70,10 +70,7 @@ class Aqualog:
 
     def redctn_factor_house(self, aptmt, houseid):
         house = self.info_extract_house(aptmt, houseid, returnDF=False)
-        if len(house) !=5:
-            return 0
-        else:
-            return int(house[3] - self.ideal_wtr)
+        return int(house[3] - self.ideal_wtr)
 
     def redctn_factor_aptmt(self, aptmt):
         aptmt_table = self.info_extract_aptmt(aptmt)
@@ -93,8 +90,14 @@ class Aqualog:
 
     def update_into_house(self, aptmt, houseid, watercharge):
         house = self.info_extract_house(aptmt, houseid)
-        command='update '+ aptmt +' set WaterCharge='+ str(watercharge) +', NumLitres='+ str(self.amt_wtr(aptmt, houseid)) +', OverageLitres='+ str(self.redctn_factor_house(aptmt, houseid)) +' where HouseId like \''+ houseid +'\''
-        self.query(command)
+        command_update_1='update '+ aptmt +' set WaterCharge='+ str(watercharge) +' where HouseId like \''+ houseid +'\''
+        command_update_2='update '+ aptmt +' set NumLitres='+ str(self.amt_wtr(aptmt, houseid)) +' where HouseId like \''+ houseid +'\''
+        command_update_3='update '+ aptmt +' set OverageLitres='+ str(self.redctn_factor_house(aptmt, houseid)) +' where HouseId like \''+ houseid +'\''
+        self.query(command_update_1)
+        self.datacon.commit()
+        self.query(command_update_2)
+        self.datacon.commit()
+        self.query(command_update_3)
         self.datacon.commit()
 
     def money_spent_extra(self, aptmt, houseid):
