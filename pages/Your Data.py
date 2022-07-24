@@ -6,6 +6,7 @@ from pandas import DataFrame
 from aqualog import Aqualog
 from Home import querydatabase, login
 import matplotlib.pyplot as plt
+import altair
 
 
 login()
@@ -60,29 +61,18 @@ if st.session_state['login']:
 
             if disp_chart == "Finance":
                 
+                st.info("Still being worked on.")
+
+            elif disp_chart == "Water usage":
+
                 aptname = st.text_input("Enter Apartment Name: ")
                 st.info("Available apartments: "+str(aql.get_apt_names()))
-                homename = st.text_input("Enter House ID: ")
-                if aptname != "":
-                    st.info("Available Home IDs: "+str(aql.get_home_names(aptname)))
                 
-                df_home = aql.disp_money_house(aptname, homename)
-                df_apt = aql.disp_money_apartment(aptname)
-                st.bar_chart(df_home)
-                st.bar_chart(df_apt)
-
-            elif disp_chart == "Water Usage":
-
-                aptname = st.text_input("Enter Apartment Name: ")
-                st.info("Available apartments: "+str(aql.get_apt_names()))
-                homename = st.text_input("Enter House ID: ")
-                if aptname != "":
-                    st.info("Available Home IDs: "+str(aql.get_home_names(aptname)))
-
-                df_home = aql.disp_litres_house(aptname, homename)
-                df_apt = aql.disp_litres_apartment(aptname)
-                st.bar_chart(df_home)
-                st.bar_chart(df_apt)
+                if st.button("Display Chart"):                
+                    df = aql.get_all_data(aptname, 'NumLitres')
+                    bar = altair.Chart(df).mark_bar().encode(x='House ID', y='Water Usage')
+                    st.altair_chart(df, use_container_width=True)
+    
                 
 
 # Update Data
@@ -117,3 +107,4 @@ if st.session_state['login']:
 
 else:
     st.error("Please sign in.")
+
