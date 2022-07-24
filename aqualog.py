@@ -2,6 +2,8 @@ import mysql.connector
 import streamlit as st
 import pandas as pd
 from pandas import DataFrame
+import matplotlib.pyplot as plt
+import numpy as np
 
 class Aqualog:
 
@@ -12,6 +14,8 @@ class Aqualog:
         self.connected = False
         self.datacon = None
         self.cursor = None
+        self.li_house_id, self.li_numlitres = [], []
+        self.li_house_id, self.li_money = [], []
     
     @st.experimental_singleton
     def start_connection(_self):
@@ -43,22 +47,33 @@ class Aqualog:
         command = "select houseid from {name}".format(name=aptname)
         return(self.query(command))
 
-    def info_extract_aptmt(self, aptmt):
+    def info_extract_aptmt(self, aptmt, returnDF=False):
         command="select * from {name}".format(name = aptmt)
         return DataFrame(self.query(command), columns=['HouseID', 'Residents', 'Water Charge', 'Water Usage (Liters)', 'Overage (Liters)'])
 
-    def info_extract_house(self, aptmt, houseid):
+    def info_extract_house(self, aptmt, houseid, returnDF=False):
         command='select * from '+ aptmt +' where HouseId like \''+ houseid +'\''
-        return DataFrame(self.query(command), columns=['HouseID', 'Residents', 'Water Charge', 'Water Usage (Liters)', 'Overage (Liters)'])
+        output = self.query(command)
+        if returnDF:
+            return DataFrame(self.query(command), columns=['HouseID', 'Residents', 'Water Charge', 'Water Usage (Liters)', 'Overage (Liters)'])
+        else:
+            return self.query(command) + [0] * 5
 
     def amt_wtr(self, aptmt, houseid):
+        
         house = self.info_extract_house(aptmt, houseid)
-        amt = ((house[2]/house[1])*1000) / self.wtr_tax
-        return amt
+        if len(house) >= 3:
+            amt = int(((house[2]/house[1])*1000) / self.wtr_tax)
+            return amt
+        else:
+            return 0
 
     def redctn_factor_house(self, aptmt, houseid):
-        house = self.info_extract_house(aptmt, houseid)
-        return house[3] - self.ideal_wtr
+        house = self.info_extract_house(aptmt, houseid, returnDF=False)
+        if len(house) !=5:
+            return 0
+        else:
+            return int(house[3] - self.ideal_wtr)
 
     def redctn_factor_aptmt(self, aptmt):
         aptmt_table = self.info_extract_aptmt(aptmt)
@@ -69,20 +84,59 @@ class Aqualog:
             tot_wtr+=house[3]
 
         avg_wtr=tot_wtr/no_people
-        return avg_wtr - self.ideal_wtr
+        return int(avg_wtr - self.ideal_wtr)
 
     def insert_into_house(self, aptmt, houseid, numppl):
-        command='update table '+ aptmt +' set NumPpl='+ str(numppl) +' where HouseId like \''+ houseid +'\''
-        self.cursor.execute(command)
+        command = "update "+ aptmt +' set NumPpl = '+ str(numppl) +" WHERE HouseId like \'" + houseid + '\''
+        self.query(command)
+        self.datacon.commit()
 
     def update_into_house(self, aptmt, houseid, watercharge):
         house = self.info_extract_house(aptmt, houseid)
-        command='update table '+ aptmt +' set WaterCharge='+ str(watercharge) +', NumLitres='+ str(self.amt_wtr(house)) +', OverageLitres='+ str(self.redctn_factor_house(house)) +' where HouseId like \''+ houseid +'\''
-        self.cursor.execute(command)
+        command='update '+ aptmt +' set WaterCharge='+ str(watercharge) +', NumLitres='+ str(self.amt_wtr(aptmt, houseid)) +', OverageLitres='+ str(self.redctn_factor_house(aptmt, houseid)) +' where HouseId like \''+ houseid +'\''
+        self.query(command)
+        self.datacon.commit()
 
     def money_spent_extra(self, aptmt, houseid):
         house = self.info_extract_house(aptmt, houseid)
         return house[2] - self.ideal_wtr_tax
+
+# Display Functions 
+    def disp_litres_house(self, aptmt, houseid):
+        house=self.info_extract_house(aptmt, houseid)
+        x = np.array([houseid, 'Ideal House'])
+        y = np.array([house[3], self.ideal_water])
+        df = pd.DataFrame({"Ideal":x, "Liters":y})
+        return df
+
+    def disp_money_house(self, aptmt, houseid):
+        house=self.info_extract_house(aptmt, houseid)
+        x = np.array([houseid, 'Ideal House'])
+        y = np.array([house[2], self.ideal_wtr_tax])
+        df = pd.DataFrame({"HouseID":x, "Amount":y})
+        return df
+
+    def disp_litres_apartment(self, aptmt):
+        aptmt_table=self.info_extract_aptmt(aptmt)
+        
+        for house in aptmt_table:
+            self.li_house_id.append(house[0])
+            self.li_numlitres.append(int(house[3]))
+        df = pd.DataFrame(list(zip(self.li_house_id, self.li_numlitres)), 
+                            columns=['HouseID', 'Water Usage'])
+        df.set_index('HouseID')
+        return df
+        
+    def disp_money_apartment(self, aptmt):
+        aptmt_table=self.info_extract_aptmt(aptmt)
+        
+        for house in aptmt_table:
+            self.li_house_id.append(house[0])
+            self.li_numlitres.append(house[2])
+        df = pd.DataFrame(list(zip(self.li_house_id, self.li_money)), 
+                            columns=['HouseID', 'Water Usage'])
+        df.set_index('HouseID')
+        return df
 
     def clean_up(self):
         if self.connected:

@@ -1,3 +1,4 @@
+from numpy import disp
 import streamlit as st
 import mysql.connector
 import pandas as pd
@@ -14,35 +15,27 @@ aql = Aqualog()
 aql.authenticate()
 
 if st.session_state['login']:    
-    st.header("Data Creation")
+    st.header("AquaData Handling")
 
-    data_menu = ["Choose Operation", "Add Data", "Display Data", "Update Data"]
+    data_menu = ["Add Data", "Display Data", "Update Data"]
     data_choice = st.selectbox('Choose operation.', data_menu)
 
+# Add Data
     if data_choice == 'Add Data':    
         apt_name = (st.text_input("Enter Apartment name: "))
         house_list = st.text_input("Enter House IDs separated by a space: ").split()
         if st.button("Begin"):
             aql.create_aptmt(apt_name, house_list)
             st.info("Data Added. Use the Data Display options to see the information.")
-    
+
+# Display Data    
     elif data_choice == 'Display Data':
         st.header("Data Display")
 
-        disp_menu = ["Independant Home", "Apartment", "Amount per House"]
+        disp_menu = ["Apartment", "Amount per House", "Charts"]
         disp_choice = st.selectbox('Choose option to display', disp_menu)
 
-        if disp_choice == "Independant Home":
-            
-            aptname = st.text_input("Enter Apartment name: ")            
-            homename = st.text_input("Enter House ID: ")
-            if aptname != "":
-                st.info("Available Home IDs: "+str(aql.get_home_names(aptname)))
-
-            if st.button("Display"):
-                st.table(aql.info_extract_house(aptname, homename))
-
-        elif disp_choice == "Apartment":
+        if disp_choice == "Apartment":
             aptname = st.text_input("Enter Apartment Name: ")
             st.info("Available apartments: "+str(aql.get_apt_names()))
             if st.button("Display"):
@@ -50,17 +43,77 @@ if st.session_state['login']:
                 st.table(df)
 
         elif disp_choice == "Amount per House":
+            
             aptname = st.text_input("Enter Apartment Name: ")
             st.info("Available apartments: "+str(aql.get_apt_names()))
             homename = st.text_input("Enter House ID: ")
-            st.info("Available Home IDs: "+str(aql.get_home_names(aptname)))
+            if aptname != "":
+                st.info("Available Home IDs: "+str(aql.get_home_names(aptname)))
 
             if st.button("Show Amount"):
-                st.subheader(aql.amt_wtr(aptname, homename))
+                st.subheader("Amount: "+str(aql.amt_wtr(aptname, homename)))
 
+        elif disp_choice == "Charts":
+            
+            disp_chart_choice = ["Finance", "Water usage"]
+            disp_chart = st.radio("Choose type of chart: ", disp_chart_choice)
+
+            if disp_chart == "Finance":
+                
+                aptname = st.text_input("Enter Apartment Name: ")
+                st.info("Available apartments: "+str(aql.get_apt_names()))
+                homename = st.text_input("Enter House ID: ")
+                if aptname != "":
+                    st.info("Available Home IDs: "+str(aql.get_home_names(aptname)))
+                
+                df_home = aql.disp_money_house(aptname, homename)
+                df_apt = aql.disp_money_apartment(aptname)
+                st.bar_chart(df_home)
+                st.bar_chart(df_apt)
+
+            elif disp_chart == "Water Usage":
+
+                aptname = st.text_input("Enter Apartment Name: ")
+                st.info("Available apartments: "+str(aql.get_apt_names()))
+                homename = st.text_input("Enter House ID: ")
+                if aptname != "":
+                    st.info("Available Home IDs: "+str(aql.get_home_names(aptname)))
+
+                df_home = aql.disp_litres_house(aptname, homename)
+                df_apt = aql.disp_litres_apartment(aptname)
+                st.bar_chart(df_home)
+                st.bar_chart(df_apt)
+                
+
+# Update Data
     elif data_choice == 'Update Data':
-        st.info("Still being worked on.")
+        
+        update_menu = ["Update Number of People", "Update Water Charge"]
+        update_choice = st.selectbox('Choose updating option.', update_menu)
+
+        if update_choice == "Update Number of People":
+            aptname = st.text_input("Enter Apartment Name: ")
+            st.info("Available apartments: "+str(aql.get_apt_names()))
+            homename = st.text_input("Enter House ID: ")
+            if aptname != "":
+                st.info("Available Home IDs: "+str(aql.get_home_names(aptname)))
+
+            numpeople = st.text_input("Enter Number of people in the house: ")
+            
+            if numpeople != "":
+                aql.insert_into_house(aptname, homename, int(numpeople))
+                st.success("Number of people updated.")
+
+        elif update_choice == "Update Water Charge":
+            aptname = st.text_input("Enter Apartment Name: ")
+            st.info("Available apartments: "+str(aql.get_apt_names()))
+            homename = st.text_input("Enter House ID: ")
+            if aptname != "":
+                st.info("Available Home IDs: "+str(aql.get_home_names(aptname)))
+
+            watercharge = st.text_input("Enter Amount spent on water: ")
+            if watercharge != "":
+                aql.update_into_house(aptname, homename, int(watercharge))
 
 else:
     st.error("Please sign in.")
-
