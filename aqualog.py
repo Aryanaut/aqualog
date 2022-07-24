@@ -59,26 +59,6 @@ class Aqualog:
         else:
             return self.query(command) + [1] * 5
 
-    def amt_wtr(self, aptmt, houseid):
-        
-        house = self.info_extract_house(aptmt, houseid)
-        peppl=house[2]/house[1]
-        amt=0
-        if len(house) >= 3:
-            if peppl>56:
-                if peppl-56>187:
-                    if peppl-187-56>625:
-                        amt+=int(((peppl-625-187-56)*1000)/45)+int(((625)*1000)/25)+int(((187)*1000)/11)+int(((56)*1000)/7)
-                    else:
-                        amt+=int(((peppl-187-56)*1000)/25)+int(((187)*1000)/11)+int(((56)*1000)/7)
-                else:
-                    amt+=int(((peppl-56)*1000)/11)+int(((56)*1000)/7)
-            else:
-                amt+=int((peppl)*1000)/7
-            return amt
-        else:
-            return 0
-
     def redctn_factor_house(self, aptmt, houseid):
         house = self.info_extract_house(aptmt, houseid, returnDF=False)
         return int(house[3] - self.ideal_wtr)
@@ -103,12 +83,24 @@ class Aqualog:
         command_update_1='update '+ aptmt +' set WaterCharge='+ str(watercharge) +' where HouseId like \''+ houseid +'\''
         self.query(command_update_1)
         self.datacon.commit()
-        numlitres=str(self.amt_wtr(aptmt, houseid))
-        command_update_2='update '+ aptmt +' set NumLitres='+ numlitres +' where HouseId like \''+ houseid +'\''
+        house = self.info_extract_house(aptmt, houseid)
+        peppl=int(watercharge)/house[1]
+        amt=0
+        if peppl>56:
+            if peppl-56>187:
+                if peppl-187-56>625:
+                    amt+=int(((peppl-625-187-56)*1000)/45)+int(((625)*1000)/25)+int(((187)*1000)/11)+int(((56)*1000)/7)
+                else:
+                    amt+=int(((peppl-187-56)*1000)/25)+int(((187)*1000)/11)+int(((56)*1000)/7)
+            else:
+                amt+=int(((peppl-56)*1000)/11)+int(((56)*1000)/7)
+        else:
+            amt+=int((peppl)*1000)/7
+        command_update_2='update '+ aptmt +' set NumLitres='+ str(amt) +' where HouseId like \''+ houseid +'\''
         self.query(command_update_2)
         self.datacon.commit()
-        overagelitres=str(self.redctn_factor_house(aptmt, houseid))
-        command_update_3='update '+ aptmt +' set OverageLitres='+ overagelitres +' where HouseId like \''+ houseid +'\''
+        overagelitres=int(amt - self.ideal_wtr)
+        command_update_3='update '+ aptmt +' set OverageLitres='+ str(overagelitres) +' where HouseId like \''+ houseid +'\''
         self.query(command_update_3)
         self.datacon.commit()
 
@@ -152,12 +144,6 @@ class Aqualog:
                             columns=['HouseID', 'Water Usage'])
         df.set_index('HouseID')
         return df
-
-    def get_all_data(self, aptname, data_type):
-        lot = self.query("select HouseID, {type} from {name}".format(type=data_type, name=aptname))
-        output = pd.DataFrame.from_records(lot, columns=["HouseID", data_type])
-        print(output)
-        return output
 
     def clean_up(self):
         if self.connected:

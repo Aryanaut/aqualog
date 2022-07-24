@@ -53,25 +53,6 @@ if st.session_state['login']:
 
             if st.button("Show Amount"):
                 st.subheader("Amount: "+str(aql.amt_wtr(aptname, homename)))
-
-        elif disp_choice == "Charts":
-            
-            disp_chart_choice = ["Finance", "Water usage"]
-            disp_chart = st.radio("Choose type of chart: ", disp_chart_choice)
-
-            if disp_chart == "Finance":
-                
-                st.info("Still being worked on.")
-
-            elif disp_chart == "Water usage":
-
-                aptname = st.text_input("Enter Apartment Name: ")
-                st.info("Available apartments: "+str(aql.get_apt_names()))
-                
-                if st.button("Display Chart"):                
-                    df = aql.get_all_data(aptname, 'NumLitres')
-                    bar = altair.Chart(df).mark_bar().encode(x='House ID', y='Water Usage')
-                    st.altair_chart(df, use_container_width=True)
     
                 
 
@@ -103,7 +84,7 @@ if st.session_state['login']:
 
             watercharge = st.text_input("Enter Amount spent on water: ")
             if watercharge != "":
-                aql.update_into_house(aptname, homename, int(watercharge))
+                aql.update_into_house(aptname, homename, watercharge)
 
 else:
     st.error("Please sign in.")
