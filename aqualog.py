@@ -76,7 +76,7 @@ class Aqualog:
         return int(amt)
 
     def redctn_factor_house(self, aptmt, houseid):
-        house = self.info_extract_house(aptmt, houseid, returnDF=False)
+        house = self.info_extract_house(aptmt, houseid, returnDF=True)
         return int(house[3] - self.ideal_wtr)
 
     def redctn_factor_aptmt(self, aptmt):
