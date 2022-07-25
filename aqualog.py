@@ -122,7 +122,7 @@ class Aqualog:
 
     def money_spent_extra(self, aptmt, houseid):
         house = self.info_extract_house(aptmt, houseid)
-        return house[2] - self.ideal_wtr_tax
+        return int(house[0][2] - self.ideal_wtr_tax)
 
 # Display Functions 
     def disp_litres_house(self, aptmt, houseid):
