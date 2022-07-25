@@ -52,7 +52,7 @@ if st.session_state['login']:
                 st.info("Available Home IDs: "+str(aql.get_home_names(aptname)))
 
             if st.button("Show Amount"):
-                st.subheader("Amount: "+str(aql.money_spent_extra(aptname, homename)))
+                st.subheader("Amount: Rs. "+str(aql.money_spent_extra(aptname, homename)))
     
                 
 
