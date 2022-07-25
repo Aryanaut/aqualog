@@ -61,7 +61,7 @@ class Aqualog:
         
     def amt_wtr(self, aptmt, houseid):
         house = self.info_extract_house(aptmt, houseid)
-        peppl=int(watercharge)/house[1]
+        peppl=int(house[2])/house[1]
         amt=0
         if peppl>56:
             if peppl-56>187:
