@@ -33,7 +33,7 @@ if st.session_state['login']:
     elif data_choice == 'Display Data':
         st.header("Data Display")
 
-        disp_menu = ["Apartment", "Amount per House", "Charts"]
+        disp_menu = ["Apartment", "Amount per House"]
         disp_choice = st.selectbox('Choose option to display', disp_menu)
 
         if disp_choice == "Apartment":
