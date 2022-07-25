@@ -100,7 +100,7 @@ class Aqualog:
         self.query(command_update_1)
         self.datacon.commit()
         house = self.info_extract_house(aptmt, houseid)
-        peppl=int(watercharge)/house[1]
+        peppl=int(watercharge)/house[0][1]
         amt=0
         if peppl>56:
             if peppl-56>187:
