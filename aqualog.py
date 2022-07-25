@@ -57,7 +57,7 @@ class Aqualog:
         if returnDF:
             return DataFrame(self.query(command), columns=['HouseID', 'Residents', 'Water Charge', 'Water Usage (Liters)', 'Overage (Liters)'])
         else:
-            return self.query(command) + [1] * 5
+            return output
         
     def amt_wtr(self, aptmt, houseid):
         house = self.info_extract_house(aptmt, houseid)
