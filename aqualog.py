@@ -58,6 +58,22 @@ class Aqualog:
             return DataFrame(self.query(command), columns=['HouseID', 'Residents', 'Water Charge', 'Water Usage (Liters)', 'Overage (Liters)'])
         else:
             return self.query(command) + [1] * 5
+        
+    def amt_wtr(self, aptmt, houseid):
+        house = self.info_extract_house(aptmt, houseid)
+        peppl=int(watercharge)/house[1]
+        amt=0
+        if peppl>56:
+            if peppl-56>187:
+                if peppl-187-56>625:
+                    amt+=int(((peppl-625-187-56)*1000)/45)+int(((625)*1000)/25)+int(((187)*1000)/11)+int(((56)*1000)/7)
+                else:
+                    amt+=int(((peppl-187-56)*1000)/25)+int(((187)*1000)/11)+int(((56)*1000)/7)
+            else:
+                amt+=int(((peppl-56)*1000)/11)+int(((56)*1000)/7)
+        else:
+            amt+=int((peppl)*1000)/7
+        return int(amt)
 
     def redctn_factor_house(self, aptmt, houseid):
         house = self.info_extract_house(aptmt, houseid, returnDF=False)
